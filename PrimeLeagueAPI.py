@@ -55,6 +55,29 @@ class PrimeGame:
             opurls.append(url)
             
         return opurls
+    
+    def getEnemyOPGG(self):
+        with open("options.json", "r") as fid:
+            options = json.load(fid)
+            
+        mateName = options.get("mateName", "")
+             
+        [team1,team2] = self.getNames()
+        
+        if mateName in team1:
+            team = team2
+        else:
+            team = team1
+            
+        team = [i.replace(" ", "%20") for i in team]
+        team = [i.replace("#", "%23") for i in team]
+            
+        url = "https://www.op.gg/multisearch/euw?summoners="
+        for i in range(len(team)):
+            url = url + str(team[i]+",")
+            
+        url = url[:-1] 
+        return url
 
 
 class PrimeTeam:
