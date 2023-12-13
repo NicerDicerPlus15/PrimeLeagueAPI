@@ -1,9 +1,5 @@
 import json
-import sys
 import requests
-
-# Define the URL and payload data for the request
-
 
 def prime(game_url):
     url = "https://www.primeleague.gg/ajax/leagues_match"
@@ -64,5 +60,6 @@ def prime(game_url):
 
 
 if __name__ == "__main__":
-    opgg = prime("")
+    gameURL = ""
+    opgg = prime(gameURL)
     print(opgg)
