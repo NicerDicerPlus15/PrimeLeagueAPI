@@ -1,7 +1,8 @@
 import json
 import requests
+from bs4 import BeautifulSoup
 
-class PrimeLeagueAPI:
+class PrimeGame:
     def __init__(self, game_url):
         url = "https://www.primeleague.gg/ajax/leagues_match"
         
@@ -24,7 +25,6 @@ class PrimeLeagueAPI:
         
         
     def getNames(self):
-        
         team1 = []
         team2 = []
 
@@ -36,18 +36,7 @@ class PrimeLeagueAPI:
     
     
     def getOPGG(self):
-        
         [team1,team2] = self.getNames()
-        
-        # with open("options.json", "r") as file:
-        #     options = json.load(file)
-        
-        # mateName = options.get("mateName", "")
-        
-        # if mateName in team1:
-        #     team = team2
-        # else:
-        #     team = team1
         
         team1 = [i.replace(" ", "%20") for i in team1]
         team2 = [i.replace(" ", "%20") for i in team2]
@@ -66,3 +55,35 @@ class PrimeLeagueAPI:
             opurls.append(url)
             
         return opurls
+
+
+class PrimeTeam:
+    def __init__(self, teamURL):
+        response = requests.get(teamURL)
+        self.soup = BeautifulSoup(response.text, 'html.parser')
+    
+    def getTeamName(self):
+        self.teamName = self.soup.find('div', class_='page-title').find('h1').text
+        return self.teamName
+        
+    def getPlayerNames(self):
+        self.playerNames = []
+        for i in self.soup.find_all('div', class_='txt-info'):
+            playerNamesTemp = i.find('span', title='League of Legends » LoL Summoner Name (EU West)')
+            confirmation = i.find('span', class_="txt-status-positive")
+            if playerNamesTemp != None and confirmation != None:
+                self.playerNames.append(playerNamesTemp.text)
+        return self.playerNames
+    
+    def getAllOPGG(self):
+        playerNames = self.getPlayerNames()
+        
+        playerNames = [i.replace(" ", "%20") for i in playerNames]
+        playerNames = [i.replace("#", "%23") for i in playerNames]
+        
+        url = "https://www.op.gg/multisearch/euw?summoners="
+        for i in range(len(playerNames)):
+            url = url + str(playerNames[i]+",")
+            
+        url = url[:-1] 
+        return url
