@@ -15,13 +15,13 @@ class PrimeGame:
             "language": "de"
         }
 
-        response = requests.post(url, data=payload)
+        self.response = requests.post(url, data=payload)
 
-        if response.status_code == 200:
-            self.response_data = response.json()
+        if self.response.status_code == 200:
+            self.response_data = self.response.json()
         
         else:
-            exit(f"Request failed with status code: {response.status_code}")
+            exit(f"Request failed with status code: {self.response.status_code}")
         
         
     def getNames(self):
@@ -78,7 +78,30 @@ class PrimeGame:
             
         url = url[:-1] 
         return url
+    
+    def getStartTime(self):
+        return self.response_data["hosting_time_start"]
+    
+    def getScore(self):
+        data = [self.response_data["score_1"], self.response_data["score_2"]]
+        return data
+    
+    
 
+class GameSite:
+    def __init__(self, gameURL):
+        response = requests.get(gameURL)
+        self.soup = BeautifulSoup(response.text, 'html.parser')
+
+    def getTeamNames(self):
+
+        title = self.soup.find('title').text
+        teams = title.split(" vs. ")
+        team1 = teams[0].split(": ")[1]
+        team2 = teams[1].split(" |")[0]
+
+        return [team1, team2]
+    
 
 class PrimeTeam:
     def __init__(self, teamURL):
@@ -110,3 +133,85 @@ class PrimeTeam:
             
         url = url[:-1] 
         return url
+    
+class RiotAPI:
+    def __init__(self):
+        with open("options.json", "r") as fid:
+            options = json.load(fid)
+        self.API_KEY = options.get("RiotAPI_Key")
+        self.region = options.get("region")
+
+    def getSummonerName(self, puuid):
+        params = {
+            'api_key': self.API_KEY
+            }
+
+        request_api=f"https://{self.region}.api.riotgames.com/riot/account/v1/accounts/by-puuid/{puuid}"
+
+        try:
+            response = requests.get(request_api, params=params)
+            summonerName = response.json()
+        except requests.exceptions.RequestException as e:
+            print(f'Issues getting Riot API data: {e}')
+
+        return summonerName["gameName"]
+
+    def getGames(self, startTime, nrGames):
+        with open("options.json", "r") as fid:
+            options = json.load(fid)
+
+        puuid = options.get("puuid")[0]
+
+        params = {
+            'api_key': self.API_KEY,
+            'count': nrGames,
+            'startTime': startTime - 2 * 3600,
+            'endTime': startTime + 2 * 3600,
+            'queue': 0
+            }
+        
+        request_api=f"https://{self.region}.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids"
+
+        try:
+            response = requests.get(request_api, params=params)
+            matchids = response.json()
+        except requests.exceptions.RequestException as e:
+            print(f'Issues getting Riot API data: {e}')
+        
+        return matchids
+
+
+    def getGameData(self,matchid):
+        params = {
+            'api_key': self.API_KEY
+            }
+        
+        request_api=f'https://{self.region}.api.riotgames.com/lol/match/v5/matches/{matchid}'
+
+        try:
+            response = requests.get(request_api, params=params)
+            matchData = response.json()
+        except requests.exceptions.RequestException as e:
+            print(f'Issues getting Riot API data: {e}')
+
+        return matchData
+    
+    def getParticipants(self, matchData):
+        participants = matchData["metadata"]["participants"]
+        return participants
+    
+    def getTimeline(self, matchid):
+        params = {
+            'api_key': self.API_KEY
+            }
+        
+        request_api=f'https://{self.region}.api.riotgames.com/lol/match/v5/matches/{matchid}/timeline'
+
+        try:
+            response = requests.get(request_api, params=params)
+            timeline = response.json()
+        except requests.exceptions.RequestException as e:
+            print(f'Issues getting Riot API data: {e}')
+
+        return timeline
+

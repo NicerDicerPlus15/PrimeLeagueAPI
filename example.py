@@ -1,17 +1,21 @@
 import PrimeLeagueAPI as pl
+import modules as md
 
 if __name__ == "__main__":
-    gameURL = ""
-    teamURL = ""
+    gameURL = "https://www.primeleague.gg/leagues/matches/1104947-ebw-unleashed-vs-back-to-circus"
+    teamURL = "https://www.primeleague.gg/leagues/teams/181171-back-to-circus"
     
     handle1 = pl.PrimeGame(gameURL)
     handle2 = pl.PrimeTeam(teamURL)
+    handle3 = pl.RiotAPI()
     
     names = handle1.getNames()
     op_urls = handle1.getOPGG()
     teamName = handle2.getTeamName()
     playerNames = handle2.getPlayerNames()
     playerOPgg = handle2.getAllOPGG()
+
+    gameData = md.getTeamData(gameURL)
     
     print("Player Names:")
     [print(name) for name in names]
@@ -24,4 +28,7 @@ if __name__ == "__main__":
     print()
     print("Team Player op.gg:")
     print(playerOPgg)
+    print()
+    print("Prime Game Data")
+    print(gameData)
     
