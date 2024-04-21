@@ -86,24 +86,8 @@ class PrimeGame:
         data = [self.response_data["score_1"], self.response_data["score_2"]]
         return data
     
-    
 
-class GameSite:
-    def __init__(self, gameURL):
-        response = requests.get(gameURL)
-        self.soup = BeautifulSoup(response.text, 'html.parser')
-
-    def getTeamNames(self):
-
-        title = self.soup.find('title').text
-        teams = title.split(" vs. ")
-        team1 = teams[0].split(": ")[1]
-        team2 = teams[1].split(" |")[0]
-
-        return [team1, team2]
-    
-
-class PrimeTeam:
+class Parser:
     def __init__(self, teamURL):
         response = requests.get(teamURL)
         self.soup = BeautifulSoup(response.text, 'html.parser')
@@ -144,6 +128,41 @@ class PrimeTeam:
                 matches.append(match['href'])
 
         return matches
+    
+    def getAllSeasons(self):
+        seasons = []
+
+        seasonTemp = self.soup.find_all("a", href=lambda href: href and "/group/" in href)
+
+        for season in seasonTemp:
+            if season['href'] not in seasons:
+                seasons.append(season['href'])
+
+        return seasons
+    
+    def getAllGamesFromSeason(self):
+        with open("options.json", "r") as fid:
+            options = json.load(fid)
+            
+        teamName = options.get("myTeamName").lower().replace(" ", "-")
+        matches = []
+
+        matchTemp = self.soup.find_all('a', class_='table-cell-container')
+
+        for match in matchTemp:
+            if match['href'] not in matches and "/teams/" not in match['href'] and teamName in match['href']:
+                matches.append(match['href'])
+
+        return matches
+    
+    def getTeamNames(self):
+
+        title = self.soup.find('title').text
+        teams = title.split(" vs. ")
+        team1 = teams[0].split(": ")[1]
+        team2 = teams[1].split(" |")[0]
+
+        return [team1, team2]
     
 class RiotAPI:
     def __init__(self):

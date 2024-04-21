@@ -34,7 +34,7 @@ def getTeamData(gameURL):
 
     myTeam = options.get("myTeamName")
 
-    handle1 = pl.GameSite(gameURL)
+    handle1 = pl.Parser(gameURL)
     handle2 = pl.PrimeGame(gameURL)
     handle3 = pl.RiotAPI()
 
@@ -57,23 +57,32 @@ def getTeamData(gameURL):
 
     for game in games:
         gameData = handle3.getGameData(game)
-        gold = getTeamGold(gameData)
-        
-        data.append({
-            "game": i,
-            "gameId": game,
-            "team1": {
-                "teamName": myTeam,
-                "win": gold[0][1],
-                "goldEarned": gold[0][2]
-                },
-            "team2": {
-                "teamName": enemyTeam,
-                "win": gold[1][1],
-                "goldEarned": gold[1][2]
-                },
 
-        })
-        i = i + 1
+        try:
+            gold = getTeamGold(gameData)
+            timestamp = gameData["info"]["gameCreation"]
+            
+            data.append({
+                "game": i,
+                "gameId": game,
+                "timestamp": timestamp,
+                "team1": {
+                    "teamName": myTeam,
+                    "win": gold[0][1],
+                    "goldEarned": gold[0][2]
+                    },
+                "team2": {
+                    "teamName": enemyTeam,
+                    "win": gold[1][1],
+                    "goldEarned": gold[1][2]
+                    },
+
+            })
+            i = i + 1
+        
+        except: 
+            if gameData["status"]["status_code"] != 200:
+                print(f'Status Code {gameData["status"]["status_code"]}')
+                data = 404
 
     return data
