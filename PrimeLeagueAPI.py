@@ -134,6 +134,17 @@ class PrimeTeam:
         url = url[:-1] 
         return url
     
+    def getAllGames(self):
+        matches = []
+
+        matchTemp = self.soup.find_all('a', class_='table-cell-container')
+
+        for match in matchTemp:
+            if match['href'] not in matches:
+                matches.append(match['href'])
+
+        return matches
+    
 class RiotAPI:
     def __init__(self):
         with open("options.json", "r") as fid:
