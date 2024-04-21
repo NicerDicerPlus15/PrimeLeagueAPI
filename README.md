@@ -17,3 +17,6 @@ In `example.py` wird unter `gameURL` die URL des PrimeLeague Matches eingegeben 
 | `getPlayerNames()` |  Gibt die Names der bestätigten Spieler eines Teams zurück        |
 | `getAllOPGG()`     |  Erstellt den op.gg Link für alle bestätigten Spieler eines Teams |
 | `getTeamData()`     |  Gibt die MatchID, die Goldverteilung und den Gewinner eines Prime Matches aus |
+
+
+Besitzt noch mehr Funktionen, allerdings schreibt sich die README nicht von alleine.
